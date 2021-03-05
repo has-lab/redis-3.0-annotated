@@ -65,14 +65,14 @@ typedef struct dictEntry {
     
     // 键
     void *key;
-    // promotion完成之后才会置promnotion为1，并置readcnt=0,缓存地址记录在cached_location
-    int readcnt=0;
-    bool promotion=false;
-    void* cached_location;
+    // promotion完成之后才会
+    bool readcnt=false;
+    bool promotion=false；
 
     // 值
     union {
         void *val;
+        void *cache
         uint64_t u64;
         int64_t s64;
     } v;
