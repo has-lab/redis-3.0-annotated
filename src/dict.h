@@ -66,9 +66,9 @@ typedef struct dictEntry {
     // 键
     void *key;
     // promotion完成之后才会置promnotion为1，并置readcnt=0,缓存地址记录在cached_location
-    int readcnt=0;
-    bool promotion=false;
-    void* cached_location;
+    int readcnt=0;  //冷热识别 0-3
+    bool promotion=false;  //promotion状态
+    void* cached_location;  //缓存中的副本位置，指针
 
     // 值
     union {
