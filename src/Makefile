@@ -20,7 +20,7 @@ DEPENDENCY_TARGETS=hiredis linenoise lua
 # Default settings
 STD=-std=c99 -pedantic
 WARN=-Wall
-OPT=$(OPTIMIZATION)
+OPT=$(OPTIMIZATION) -lpthread
 
 PREFIX?=/usr/local
 INSTALL_BIN=$(PREFIX)/bin

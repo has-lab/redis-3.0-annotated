@@ -62,6 +62,11 @@
 #include "version.h" /* Version macro */
 #include "util.h"    /* Misc functions useful in many places */
 
+#include <sys/wait.h>
+#include <unistd.h> 
+#include <sys/syscall.h>
+#define gettidv1() syscall(__NR_gettid)
+
 /* Error codes */
 #define REDIS_OK                0
 #define REDIS_ERR               -1
