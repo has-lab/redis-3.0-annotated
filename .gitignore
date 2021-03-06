@@ -25,4 +25,4 @@ deps/lua/src/liblua.a
 .make-*
 .prerequisites
 *.dSYM
-.history
+.history/*
