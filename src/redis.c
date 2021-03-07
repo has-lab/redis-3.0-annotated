@@ -3929,13 +3929,23 @@ void redisSetProcTitle(char *title) {
     REDIS_NOTUSED(title);
 #endif
 }
-
+void alloc_assert(void *p, char *s)
+{
+	if (p != NULL) return;
+	printf("malloc %s error\n", s);
+	getchar();
+	exit(-1);
+}
 pthread_t pid;
+//void handle_promotion(){
+//};
 
-void wjf_loop(){
+void cache_loop(){
     while(1){
-        printf("wjf_loop exist, The ID of wjf_loop thread is: %ld\n", (long int)gettidv1());
-        sleep(5);
+        
+       
+        
+        //handle_promotion();
     }
 }
 int main(int argc, char **argv) {
@@ -4085,16 +4095,18 @@ int main(int argc, char **argv) {
     aeSetBeforeSleepProc(server.el,beforeSleep);
     printf("e\n");
     printf("before pthread_create\n");
-    pthread_create(&pid, NULL, (void*)wjf_loop, NULL);
+    pthread_create(&pid, NULL, (void*)cache_loop, NULL);
     aeMain(server.el);
 
     printf("after pthread_create\n");
-    pthread_join(pid, NULL);
+    
 
     // 服务器关闭，停止事件循环
     aeDeleteEventLoop(server.el);
 
     return 0;
 }
+
+
 
 /* The End */
