@@ -29,7 +29,7 @@
 
 #include "redis.h"
 #include "cluster.h"
-
+#include "haslab_cache.h"
 #include <signal.h>
 #include <ctype.h>
 
@@ -45,18 +45,32 @@ void slotToKeyFlush(void);
  * 从数据库 db 中取出键 key 的值（对象）
  *
  * 如果 key 的值存在，那么返回该值；否则，返回 NULL 。
+ * 
+ * 读取操作： op_type=1
+ * 写入操作： op_type=0
  */
-robj *lookupKey(redisDb *db, robj *key) {
+robj *lookupKey(redisDb *db, robj *key, int op_type) {
 
     // 查找键空间
     dictEntry *de = dictFind(db->dict,key->ptr);
-
+    
     // 节点存在
     if (de) {
         
-
         // 取出值
         robj *val = dictGetVal(de);
+
+
+        if(op_type == 1){
+            //冷识别被和promotion
+            de->readcnt += 1;
+            if(de->readcnt >= PROMOTION_THRESHOLD){
+                //执行异步数据迁移，即发出迁移指令之后不等待，
+                //写一致性由主线程写函数额外实现，
+                //迁移完成之后由回调函数执行，更新有关条目时需要上锁
+                //handle_promotion(de, val);
+            }
+        }
 
         /* Update the access time for the ageing algorithm.
          * Don't do it if we have a saving child, as this will trigger
@@ -89,7 +103,7 @@ robj *lookupKeyRead(redisDb *db, robj *key) {
     expireIfNeeded(db,key);
 
     // 从数据库中取出键的值
-    val = lookupKey(db,key);
+    val = lookupKey(db,key,1);
 
     // 更新命中/不命中信息
     if (val == NULL)
@@ -114,7 +128,7 @@ robj *lookupKeyWrite(redisDb *db, robj *key) {
     expireIfNeeded(db,key);
 
     // 查找并返回 key 的值对象
-    return lookupKey(db,key);
+    return lookupKey(db,key,0);
 }
 
 /*

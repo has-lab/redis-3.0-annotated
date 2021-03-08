@@ -31,7 +31,6 @@
 #include "cluster.h"
 #include "slowlog.h"
 #include "bio.h"
-#include "haslab_cache.h"
 
 #include <time.h>
 #include <signal.h>

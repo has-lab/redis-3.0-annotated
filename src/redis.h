@@ -50,6 +50,7 @@
 #include <netinet/in.h>
 #include <lua.h>
 #include <signal.h>
+#include </usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h>
 
 #include "ae.h"      /* Event driven programming library */
 #include "sds.h"     /* Dynamic safe strings */
@@ -1831,7 +1832,7 @@ void propagateExpire(redisDb *db, robj *key);
 int expireIfNeeded(redisDb *db, robj *key);
 long long getExpire(redisDb *db, robj *key);
 void setExpire(redisDb *db, robj *key, long long when);
-robj *lookupKey(redisDb *db, robj *key);
+robj *lookupKey(redisDb *db, robj *key, int op_type);
 robj *lookupKeyRead(redisDb *db, robj *key);
 robj *lookupKeyWrite(redisDb *db, robj *key);
 robj *lookupKeyReadOrReply(redisClient *c, robj *key, robj *reply);
@@ -2075,3 +2076,9 @@ void redisLogHexDump(int level, char *descr, void *value, size_t len);
     printf("-- MARK %s:%d --\n", __FILE__, __LINE__)
 
 #endif
+
+/* Haslab Cache */
+#define PROMOTION_THRESHOLD 3
+void haslab_cache_loop();
+void handle_promotion(dictEntry *de, robj* val);
+void promotion_callback(void* key);
