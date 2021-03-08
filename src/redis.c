@@ -31,6 +31,7 @@
 #include "cluster.h"
 #include "slowlog.h"
 #include "bio.h"
+#include "haslab_cache.h"
 
 #include <time.h>
 #include <signal.h>
@@ -67,6 +68,9 @@ double R_Zero, R_PosInf, R_NegInf, R_Nan;
 /* Global vars */
 struct redisServer server; /* server global state */
 struct redisCommand *commandTable;
+
+/* haslab add */
+extern pthread_t haslab_cacheloop_pid;
 
 /* Our command table.
  *
@@ -3930,19 +3934,6 @@ void redisSetProcTitle(char *title) {
 #endif
 }
 
-/* ---------------------haslab add--------------------- */
-pthread_t haslab_pid;
-//void handle_promotion(){
-//};
-
-void cache_loop(){
-    while(1){
-
-        //handle_promotion();
-    }
-}
-/* ---------------------------------------------------- */
-
 int main(int argc, char **argv) {
     struct timeval tv;
 
@@ -4091,14 +4082,14 @@ int main(int argc, char **argv) {
 
 /* ---------------------haslab add--------------------- */
     //printf("before pthread_create\n");
-    pthread_create(&haslab_pid, NULL, (void*)cache_loop, NULL);
+    pthread_create(&haslab_cacheloop_pid, NULL, (void*)haslab_cache_loop, NULL);
 /* ---------------------------------------------------- */
 
     aeMain(server.el);
 
 /* ---------------------haslab add--------------------- */
     //printf("after pthread_create\n"); 
-    pthread_join(haslab_pid, NULL);
+    pthread_join(haslab_cacheloop_pid, NULL);
 /* ---------------------------------------------------- */
 
     // 服务器关闭，停止事件循环

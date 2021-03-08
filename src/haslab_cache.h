@@ -1,3 +1,3 @@
-#include <stdint.h>
-#include <stdbool.h>
 
+void haslab_cache_loop();
+void handle_promotion();

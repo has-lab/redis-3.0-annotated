@@ -32,19 +32,10 @@
 
 #include <signal.h>
 #include <ctype.h>
-#define BUFFER_SIZE 1024
+
 void slotToKeyAdd(robj *key);
 void slotToKeyDel(robj *key);
 void slotToKeyFlush(void);
-
-/* ---------------------haslab add--------------------- */
-#define BUFFER_SIZE 1024
-static struct{
-void* buffer[BUFFER_SIZE];
-int head; //下标 后台线程去取出
-int tail; //下标 主线程插入
-} promotion_info;
-/* ---------------------------------------------------- */
 
 /*-----------------------------------------------------------------------------
  * C-level DB API
