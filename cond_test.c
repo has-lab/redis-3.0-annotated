@@ -25,7 +25,7 @@ void *consumer(void *p)
 		pthread_mutex_unlock(&lock);
 		printf("Consume %d\n", mp->num);
 		free(mp);
-		//sleep(rand() % 5);
+		sleep(rand() % 50);
 	}
 }
 

@@ -4081,7 +4081,7 @@ int main(int argc, char **argv) {
 
 /* ---------------------haslab add--------------------- */
     //printf("before pthread_create\n");
-    pthread_create(&haslab_cacheloop_pid, NULL, (void*)haslab_cache_loop, NULL);
+    pthread_create(&haslab_cacheloop_pid, NULL, (void*)handle_promotion, NULL);
 /* ---------------------------------------------------- */
 
     aeMain(server.el);
