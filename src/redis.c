@@ -3930,6 +3930,7 @@ void redisSetProcTitle(char *title) {
 #endif
 }
 
+/* ---------------------haslab add--------------------- */
 pthread_t pid;
 
 void wjf_loop(){
@@ -3938,6 +3939,8 @@ void wjf_loop(){
         sleep(5);
     }
 }
+/* ---------------------------------------------------- */
+
 int main(int argc, char **argv) {
     struct timeval tv;
 
@@ -4080,16 +4083,18 @@ int main(int argc, char **argv) {
     if (server.maxmemory > 0 && server.maxmemory < 1024*1024) {
         redisLog(REDIS_WARNING,"WARNING: You specified a maxmemory value that is less than 1MB (current value is %llu bytes). Are you sure this is what you really want?", server.maxmemory);
     }
-    printf("c\n");
+
     // 运行事件处理器，一直到服务器关闭为止
     aeSetBeforeSleepProc(server.el,beforeSleep);
-    printf("e\n");
+
+/* ---------------------haslab add--------------------- */
     printf("before pthread_create\n");
     pthread_create(&pid, NULL, (void*)wjf_loop, NULL);
     aeMain(server.el);
 
     printf("after pthread_create\n");
     pthread_join(pid, NULL);
+/* ---------------------------------------------------- */
 
     // 服务器关闭，停止事件循环
     aeDeleteEventLoop(server.el);
