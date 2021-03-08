@@ -3929,27 +3929,15 @@ void redisSetProcTitle(char *title) {
     REDIS_NOTUSED(title);
 #endif
 }
-<<<<<<< HEAD
 
 /* ---------------------haslab add--------------------- */
-=======
-void alloc_assert(void *p, char *s)
-{
-	if (p != NULL) return;
-	printf("malloc %s error\n", s);
-	getchar();
-	exit(-1);
-}
->>>>>>> 28af860783b8cbcd7b9f21de60e6c032c877d5d9
-pthread_t pid;
+pthread_t haslab_pid;
 //void handle_promotion(){
 //};
 
 void cache_loop(){
     while(1){
-        
-       
-        
+
         //handle_promotion();
     }
 }
@@ -4102,17 +4090,16 @@ int main(int argc, char **argv) {
     aeSetBeforeSleepProc(server.el,beforeSleep);
 
 /* ---------------------haslab add--------------------- */
-    printf("before pthread_create\n");
-    pthread_create(&pid, NULL, (void*)cache_loop, NULL);
+    //printf("before pthread_create\n");
+    pthread_create(&haslab_pid, NULL, (void*)cache_loop, NULL);
+/* ---------------------------------------------------- */
+
     aeMain(server.el);
 
-    printf("after pthread_create\n");
-<<<<<<< HEAD
-    pthread_join(pid, NULL);
+/* ---------------------haslab add--------------------- */
+    //printf("after pthread_create\n"); 
+    pthread_join(haslab_pid, NULL);
 /* ---------------------------------------------------- */
-=======
-    
->>>>>>> 28af860783b8cbcd7b9f21de60e6c032c877d5d9
 
     // 服务器关闭，停止事件循环
     aeDeleteEventLoop(server.el);
