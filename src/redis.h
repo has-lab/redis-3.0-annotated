@@ -2078,6 +2078,9 @@ void redisLogHexDump(int level, char *descr, void *value, size_t len);
 #endif
 
 /* Haslab Cache */
+#define HASLAB_CACHE_NUM_OPS 2
 #define PROMOTION_THRESHOLD 3
-void handle_promotion(dictEntry *de, robj* val);
-void promotion_callback(void* key);
+
+
+void HandlePromotion(dictEntry *de, robj* val);
+void PromotionCallback(void* key);

@@ -38,6 +38,7 @@ void slotToKeyDel(robj *key);
 void slotToKeyFlush(void);
 
 /* Haslab add */
+extern Promotion_Info promotion_info;
 extern pthread_mutex_t cache_mutex;
 extern pthread_cond_t cache_cond;
 extern int aaa;
@@ -77,6 +78,7 @@ robj *lookupKey(redisDb *db, robj *key, int op_type) {
                 pthread_mutex_lock(&cache_mutex);
                 aaa = de->readcnt;
                 to_promotion = true;
+                PromotionPush(&promotion_info, key->ptr);
                 printf("lookupKey %d\n", aaa);
                 pthread_mutex_unlock(&cache_mutex);
                 pthread_cond_signal(&cache_cond);

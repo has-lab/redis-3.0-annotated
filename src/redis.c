@@ -70,6 +70,7 @@ struct redisCommand *commandTable;
 
 /* haslab add */
 extern pthread_t haslab_cacheloop_pid;
+extern void InitPromotion();
 
 /* Our command table.
  *
@@ -4081,7 +4082,8 @@ int main(int argc, char **argv) {
 
 /* ---------------------haslab add--------------------- */
     //printf("before pthread_create\n");
-    pthread_create(&haslab_cacheloop_pid, NULL, (void*)handle_promotion, NULL);
+    InitP();
+    pthread_create(&haslab_cacheloop_pid, NULL, (void*)HandlePromotion, NULL);
 /* ---------------------------------------------------- */
 
     aeMain(server.el);
