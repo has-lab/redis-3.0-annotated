@@ -32,7 +32,7 @@
 
 #include <signal.h>
 #include <ctype.h>
-
+#define BUFFER_SIZE 1024
 void slotToKeyAdd(robj *key);
 void slotToKeyDel(robj *key);
 void slotToKeyFlush(void);
