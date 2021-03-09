@@ -1,45 +1,40 @@
 #include "haslab_cache.h"
 #include "redis.h"
 
-Promotion_Info promotion_info;
 ///int aaa = 0;
 //bool to_promotion;
 //to do只用锁，不用条件变量
 //pthread_t cache_threads[HASLAB_CACHE_NUM_OPS];
-pthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t cache_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_cond_t cache_cond = PTHREAD_COND_INITIALIZER;
+//pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-pthread_cond_t cache_cond = PTHREAD_COND_INITIALIZER;
-//pthread_mutex_t dict_mutex;
-
-pthread_t haslab_cacheloop_tid[MAX_PROMOTION_THREAD_NUM]; //后台页迁移线程表
-int promotion_thread_num = 0;
-pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
-
+Promotion_Info promotion_info;
+Thread_Pool thread_pool;
 
 void HandlePromotion(){
     Promotion_Info* pi = &promotion_info;
     
     
     while(true){
-        pthread_mutex_lock(&thread_mutex);
+        
         //如果producer比consumer快,则产生额外一个线程处理该请求（while循环下线程产生速度是2的幂）
         if((!PromotionIsEmpty(pi))&&(pi->len>1)){
-            
             InitNewThread(pi->len);
         }
         else if(PromotionIsEmpty(pi)){ //如果为空，则删除线程表中(promotion_thread_num-pi->len)个线程
-                
-            if(pi->len<promotion_thread_num){ //只有当len<线程数时才有必要继续关闭线程
+            pthread_mutex_lock(&thread_pool.tp_mutex);
+            if(pi->len<thread_pool.promotion_thread_num){ //只有当len<线程数时才有必要继续关闭线程
                 pthread_t curr_tid=pthread_self();
                 int j=0;
-                if(curr_tid!=haslab_cacheloop_tid[0]){       
-                    for(j=1;j<promotion_thread_num;j++){
-                        if(haslab_cacheloop_tid[j] == curr_tid){
-                            haslab_cacheloop_tid[j]=-1;
-                            promotion_thread_num--;
+                if(curr_tid!=thread_pool.haslab_cacheloop_tid[0]){       
+                    for(j=1;j<thread_pool.promotion_thread_num;j++){
+                        if(thread_pool.haslab_cacheloop_tid[j] == curr_tid){
+                            thread_pool.haslab_cacheloop_tid[j]=-1;
+                            thread_pool.promotion_thread_num--;
                             break;
                         }
-                        pthread_mutex_unlock(&thread_mutex);
+                        pthread_mutex_unlock(&thread_pool.tp_mutex);
                         //线程主动退出
                         pthread_exit(0);
                     }
@@ -68,34 +63,39 @@ void HandlePromotion(){
     }
 }
 
-void InitPromotion(Promotion_Info *pi)//初始化
+void InitPromotion(Promotion_Info *pi, Thread_Pool *tp)//初始化
 {
-    redisAssert(pi != NULL);
+    redisAssert(pi != NULL && tp != NULL);
+    
     pi->promotionbuferhead = NULL;
     pi->promotionbufertail = NULL;
     pi->len = 0;
+    pthread_mutex_init(&pi->pi_mutex, NULL);
+    
+    tp->promotion_thread_num = 0;
+    pthread_mutex_init(&tp->tp_mutex, NULL);
 }
 
 void InitNewThread(int len){
     pthread_attr_t attr;
     pthread_t thread;
     void *arg = NULL;
-    pthread_mutex_lock(&thread_mutex);
-    if((promotion_thread_num < MAX_PROMOTION_THREAD_NUM)&&(len>promotion_thread_num)){
+    pthread_mutex_lock(&thread_pool.tp_mutex);
+    if((thread_pool.promotion_thread_num < MAX_PROMOTION_THREAD_NUM)&&(len>thread_pool.promotion_thread_num)){
         pthread_attr_init(&attr);
         if (pthread_create(&thread, &attr, HandlePromotion, arg) != 0) {
             redisLog(REDIS_WARNING,"Fatal: Can't initialize Promotion Threads.");
             exit(1);
         }
         
-    promotion_thread_num++;
-    haslab_cacheloop_tid[promotion_thread_num-1] = thread;
-    pthread_mutex_unlock(&thread_mutex);
+        thread_pool.promotion_thread_num++;
+        thread_pool.haslab_cacheloop_tid[thread_pool.promotion_thread_num-1] = thread;
+        pthread_mutex_unlock(&thread_pool.tp_mutex);
     }
 }
 
 void InitP(){
-    InitPromotion(&promotion_info);
+    InitPromotion(&promotion_info, &thread_pool);
     InitNewThread(0);
 }
 
@@ -129,7 +129,7 @@ void PromotionPush(Promotion_Info *pi, void* key)//进队,由主线程执行
 
     new_node->data=key;
 
-    pthread_mutex_lock(&cache_mutex);
+    pthread_mutex_lock(&pi->pi_mutex);
 
     if(!PromotionIsEmpty(pi)){// buffer is not empty
         pi->promotionbufertail->next=new_node;
@@ -139,17 +139,17 @@ void PromotionPush(Promotion_Info *pi, void* key)//进队,由主线程执行
         pi->promotionbuferhead=new_node;
         pi->promotionbufertail=new_node;
     }
-        pi->len++;
-    pthread_mutex_unlock(&cache_mutex);
+    pi->len++;
+    pthread_mutex_unlock(&pi->pi_mutex);
 }
 
 PromotionBufferNode* PromotionPop(Promotion_Info *pi, void *data)//出从队首去取
 {
     
     PromotionBufferNode *tmp = NULL;
-    pthread_mutex_lock(&cache_mutex);
+    pthread_mutex_lock(&pi->pi_mutex);
     if(PromotionIsEmpty(pi)){   //若队列为空，则出队失败
-        pthread_mutex_unlock(&cache_mutex);
+        pthread_mutex_unlock(&pi->pi_mutex);
         return tmp;
     }
     else{
@@ -157,7 +157,7 @@ PromotionBufferNode* PromotionPop(Promotion_Info *pi, void *data)//出从队首�
         tmp = pi->promotionbuferhead;
         pi->promotionbuferhead = tmp->next;
         pi->len--;
-        pthread_mutex_unlock(&cache_mutex);
+        pthread_mutex_unlock(&pi->pi_mutex);
         data=tmp->data;
         return tmp;
     }
@@ -167,7 +167,7 @@ void promotionbufferdelete(Promotion_Info *pi){//遍历每一个
 
     PromotionBufferNode *tmp=NULL;
     
-    pthread_mutex_lock(&cache_mutex);
+    pthread_mutex_lock(&pi->pi_mutex);
 
     tmp=pi->promotionbuferhead;
 

@@ -554,6 +554,12 @@ dictEntry *dictAddRaw(dict *d, void *key)
     entry = zmalloc(sizeof(*entry));
     // 将新节点插入到链表表头
     entry->next = ht->table[index];
+
+    entry->readcnt=0;//冷热识别 0-PROMOTION_THRESHOLD
+    entry->promotion=0;//promotion状态
+    entry->cached_location=NULL;//缓存中的副本位置，指针
+    pthread_mutex_init(&entry->lock, NULL);//用于保证多线程下的一致性
+
     ht->table[index] = entry;
     // 更新哈希表已使用节点数量
     ht->used++;

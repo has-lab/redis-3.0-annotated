@@ -80,6 +80,7 @@ typedef struct dictEntry {
     int readcnt;//冷热识别 0-PROMOTION_THRESHOLD
     bool promotion;//promotion状态
     void* cached_location;//缓存中的副本位置，指针
+    pthread_mutex_t lock; //用于保证多线程下的一致性
 } dictEntry;
 
 
