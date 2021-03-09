@@ -76,12 +76,13 @@ robj *lookupKey(redisDb *db, robj *key, int op_type) {
                 //写一致性由主线程写函数额外实现，
                 //迁移完成之后由回调函数执行，更新有关条目时需要上锁
                 pthread_mutex_lock(&cache_mutex);
-                aaa = de->readcnt;
-                to_promotion = true;
+               // aaa = de->readcnt;
+               // to_promotion = true;
                 PromotionPush(&promotion_info, key->ptr);
                 printf("lookupKey %d\n", aaa);
+               // pthread_cond_signal(&cache_cond);
                 pthread_mutex_unlock(&cache_mutex);
-                pthread_cond_signal(&cache_cond);
+                
             }
         }
 

@@ -4083,14 +4083,13 @@ int main(int argc, char **argv) {
 /* ---------------------haslab add--------------------- */
     //printf("before pthread_create\n");
     InitP();
-    pthread_create(&haslab_cacheloop_pid, NULL, (void*)HandlePromotion, NULL);
 /* ---------------------------------------------------- */
 
     aeMain(server.el);
 
 /* ---------------------haslab add--------------------- */
     //printf("after pthread_create\n"); 
-    pthread_join(haslab_cacheloop_pid, NULL);
+    //pthread_join(haslab_cacheloop_pid, NULL);
 /* ---------------------------------------------------- */
 
     // 服务器关闭，停止事件循环

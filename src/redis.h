@@ -2082,5 +2082,5 @@ void redisLogHexDump(int level, char *descr, void *value, size_t len);
 #define PROMOTION_THRESHOLD 3
 
 
-void HandlePromotion(dictEntry *de, robj* val);
+void HandlePromotion(void);
 void PromotionCallback(void* key);
