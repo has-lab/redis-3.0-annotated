@@ -1,6 +1,6 @@
 #include <stdbool.h>
 //#define HASLAB_BUFFER_SIZE 64
-#define MAX_PROMOTION_THREAD_NUM 1024
+#define MAX_PROMOTION_THREAD_NUM 64
 //to do :修改成链表，取消使用条件变量
 
 typedef struct PromotionBufferNode{ 
@@ -19,7 +19,7 @@ void InitP();
 void InitPromotion(Promotion_Info *pi);
 bool PromotionIsEmpty(Promotion_Info *pi);
 void PromotionPush(Promotion_Info *pi, void* key);
-void* PromotionPop(Promotion_Info *pi);
+void* PromotionPop(Promotion_Info *pi, (void *)  data);
 void promotionbufferdelete(Promotion_Info *pi);//用于主线程在更新时删除无效的条目
 
 
