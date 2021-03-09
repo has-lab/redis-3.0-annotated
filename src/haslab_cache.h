@@ -4,10 +4,14 @@
 #define MAX_PROMOTION_THREAD_NUM 100
 //to do :修改成链表，取消使用条件变量
 
+typedef struct KVCache_Node{
+    void *key;
+    void *value;
+} KVCache_Node;
+
 typedef struct PromotionBufferNode{ 
-    void* data;                         //数据,结构体形式
-   // struct PromotionBufferNode * pre;   
-    struct PromotionBufferNode * next;  
+    KVCache_Node *data;     //数据,结构体形式
+    struct PromotionBufferNode *next;
 } PromotionBufferNode;
 
 typedef struct Promotion_Info {
@@ -24,9 +28,9 @@ typedef struct Thread_Pool{
 } Thread_Pool;
 
 void InitP();
-void InitNewThread(int len);
+void InitNewThread(int tp_len);
 void InitPromotion(Promotion_Info *pi, Thread_Pool *tp);
 bool PromotionIsEmpty(Promotion_Info *pi);
-void PromotionPush(Promotion_Info *pi, void* key);
+void PromotionPush(Promotion_Info *pi, void *key, void *val);
 PromotionBufferNode* PromotionPop(Promotion_Info *pi, void *data);
 void promotionbufferdelete(Promotion_Info *pi);//用于主线程在更新时删除无效的条目
