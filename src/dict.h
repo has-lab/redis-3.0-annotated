@@ -77,7 +77,7 @@ typedef struct dictEntry {
     struct dictEntry *next;
     // promotion完成之后才会置promnotion为1，并置readcnt=0,缓存地址记录在cached_location
     //如果主线程在更新时访问该条目，则加锁置promotion=-1告知后台线程放弃操作
-    int readcnt;//冷热识别 0-3
+    int readcnt;//冷热识别 0-PROMOTION_THRESHOLD
     bool promotion;//promotion状态
     void* cached_location;//缓存中的副本位置，指针
 } dictEntry;

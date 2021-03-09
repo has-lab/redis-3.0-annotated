@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <sys/mman.h>
 #include <math.h>
+#include </usr/include/x86_64-linux-gnu/bits/mathcalls.h>
 #include <assert.h>
 
 #define SLAB_DUMP_COLOURED
