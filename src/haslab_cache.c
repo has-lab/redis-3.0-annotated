@@ -21,31 +21,30 @@ void HandlePromotion(){
     
     
     while(true){
-        
+        pthread_mutex_lock(&thread_mutex);
         //如果producer比consumer快,则产生额外一个线程处理该请求（while循环下线程产生速度是2的幂）
         if((!PromotionIsEmpty(pi))&&(pi->len>1)){
             
             InitNewThread(pi->len);
         }
         else if(PromotionIsEmpty(pi)){ //如果为空，则删除线程表中(promotion_thread_num-pi->len)个线程
-                pthread_mutex_lock(&thread_mutex);
-                if(pi->len<promotion_thread_num){
-                    pthread_t curr_tid=pthread_self();
-                    int j=0;
-                    if(curr_tid!=haslab_cacheloop_tid[0])
-                    {       
-                        for(j=1;j<promotion_thread_num;j++){
-                            if(haslab_cacheloop_tid[j] == curr_tid){
-                                haslab_cacheloop_tid[j]=-1;
-                                promotion_thread_num--;
-                                break;
-                            }
-                pthread_mutex_unlock(&thread_mutex);
+                
+            if(pi->len<promotion_thread_num){ //只有当len<线程数时才有必要继续关闭线程
+                pthread_t curr_tid=pthread_self();
+                int j=0;
+                if(curr_tid!=haslab_cacheloop_tid[0]){       
+                    for(j=1;j<promotion_thread_num;j++){
+                        if(haslab_cacheloop_tid[j] == curr_tid){
+                            haslab_cacheloop_tid[j]=-1;
+                            promotion_thread_num--;
+                            break;
+                        }
+                        pthread_mutex_unlock(&thread_mutex);
                         //线程主动退出
                         pthread_exit(0);
                     }
-                    }
                 }
+            }
             
         }
 
