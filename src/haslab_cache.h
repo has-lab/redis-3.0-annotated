@@ -22,15 +22,16 @@ typedef struct Promotion_Info {
 } Promotion_Info;
 
 typedef struct Thread_Pool{
-    pthread_t haslab_cacheloop_tid[MAX_PROMOTION_THREAD_NUM]; //后台页迁移线程表
+    pthread_t haslab_cacheloop_tid; //后台页迁移线程
     int promotion_thread_num ;
     pthread_mutex_t tp_mutex;
 } Thread_Pool;
 
 void InitP();
+void InitFirstThread();
 void InitNewThread(int tp_len);
 void InitPromotion(Promotion_Info *pi, Thread_Pool *tp);
 bool PromotionIsEmpty(Promotion_Info *pi);
 void PromotionPush(Promotion_Info *pi, void *key, void *val);
-PromotionBufferNode* PromotionPop(Promotion_Info *pi, void *data);
+PromotionBufferNode* PromotionPop(Promotion_Info *pi);
 void promotionbufferdelete(Promotion_Info *pi);//用于主线程在更新时删除无效的条目
