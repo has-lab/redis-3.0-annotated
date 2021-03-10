@@ -5,8 +5,8 @@
 //to do :修改成链表，取消使用条件变量
 
 typedef struct KVCache_Node{
-    void *key;
-    void *value;
+    char *key;
+    char *value;
 } KVCache_Node;
 
 typedef struct PromotionBufferNode{ 
@@ -32,6 +32,6 @@ void InitFirstThread();
 void InitNewThread(int tp_len);
 void InitPromotion(Promotion_Info *pi, Thread_Pool *tp);
 bool PromotionIsEmpty(Promotion_Info *pi);
-void PromotionPush(Promotion_Info *pi, void *key, void *val);
+void PromotionPush(Promotion_Info *pi, char *key, char *val);
 PromotionBufferNode* PromotionPop(Promotion_Info *pi);
 void promotionbufferdelete(Promotion_Info *pi);//用于主线程在更新时删除无效的条目
