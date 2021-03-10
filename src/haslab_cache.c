@@ -47,12 +47,14 @@ void HandlePromotion(){
         // }
         pthread_mutex_lock(&pi->pi_mutex);
         if(!PromotionIsEmpty(pi)){
-            void *data;
+            KVCache_Node *data;
             PromotionBufferNode *tmp = NULL;
             //取值并更新head
             tmp = PromotionPop(&promotion_info); //用data取数据（数据迁移），用tmp取指针（释放空间）
             pthread_mutex_unlock(&pi->pi_mutex);
-            printf("pop %s %s\n", tmp->data->key, tmp->data->value);
+            
+            data = (KVCache_Node*)tmp->data;
+            printf("pop %s %s\n", data->key, data->value);
             //执行真正的数据promtoion（分配空间并写入）
             //sleep(10);
             //promotion完成，检查相关条目（promotion==-1？）是否需要放弃此次promotion并free slab slot空间；
@@ -145,14 +147,17 @@ void PromotionPush(Promotion_Info *pi, char *key, char *val)//进队,由主线�
         exit(1);
     }
 	memset(new_node, 0, sizeof(PromotionBufferNode));
-    new_node->data = (KVCache_Node*)malloc(sizeof(KVCache_Node));
-    if(new_node->data == NULL){
-        redisLog(REDIS_WARNING, "Fatal: Can't malloc for PromotionBufferNode's data.");
-        exit(1);
-    }
 
-    new_node->data->key = key;
-    new_node->data->value = val;
+    KVCache_Node *kv_node = (KVCache_Node*)malloc(sizeof(KVCache_Node));
+    int keysize = sizeof(key);
+    int valsize = sizeof(val);
+    kv_node->key = (char*)malloc(keysize);
+    kv_node->value = (char*)malloc(valsize);
+    memcpy(kv_node->key, key, keysize);
+    memcpy(kv_node->value, val, valsize);
+
+    new_node->data = kv_node;
+
     pthread_mutex_lock(&pi->pi_mutex);
     if(!PromotionIsEmpty(pi)){// buffer is not empty
         pi->promotionbufertail->next = new_node;
@@ -163,7 +168,7 @@ void PromotionPush(Promotion_Info *pi, char *key, char *val)//进队,由主线�
         pi->promotionbufertail = new_node;
     }
     pi->len++;
-    printf("push %s %s\n", key, val);
+    printf("push %s %s\n", kv_node->key, kv_node->value);
     pthread_mutex_unlock(&pi->pi_mutex);
 }
 
@@ -191,11 +196,7 @@ PromotionBufferNode* PromotionPop(Promotion_Info *pi)//出从队首去取
 
         PromotionBufferNode *tmp = pi->promotionbuferhead;
 
-        new_node->data->key = tmp->data->key;
-        new_node->data->value = tmp->data->value;
-        new_node->next = NULL;
-
-        printf("in pop : key %s val %s\n", tmp->data->key, tmp->data->value);
+        new_node->data = tmp->data;
 
         pi->promotionbuferhead = tmp->next;
         pi->len--;
@@ -204,8 +205,8 @@ PromotionBufferNode* PromotionPop(Promotion_Info *pi)//出从队首去取
             pi->promotionbuferhead = pi->promotionbufertail = NULL;
         }
 
-        free(tmp->data);
-        tmp->data = NULL;
+        //free(tmp->data);
+        //tmp->data = NULL;
         free(tmp);
         tmp = NULL;
 

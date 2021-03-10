@@ -2,15 +2,14 @@
 #include <pthread.h>
 //#define HASLAB_BUFFER_SIZE 64
 #define MAX_PROMOTION_THREAD_NUM 100
-//to do :修改成链表，取消使用条件变量
 
 typedef struct KVCache_Node{
-    char *key;
-    char *value;
+    const char *key;
+    const char *value;
 } KVCache_Node;
 
 typedef struct PromotionBufferNode{ 
-    KVCache_Node *data;     //数据,结构体形式
+    void *data;     //数据,结构体形式
     struct PromotionBufferNode *next;
 } PromotionBufferNode;
 
@@ -23,7 +22,7 @@ typedef struct Promotion_Info {
 
 typedef struct Thread_Pool{
     pthread_t haslab_cacheloop_tid; //后台页迁移线程
-    int promotion_thread_num ;
+    int promotion_thread_num;
     pthread_mutex_t tp_mutex;
 } Thread_Pool;
 
