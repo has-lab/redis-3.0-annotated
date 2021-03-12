@@ -74,11 +74,10 @@ robj *lookupKey(redisDb *db, robj *key, int op_type) {
                 //执行异步数据迁移，即发出迁移指令之后不等待，
                 //写一致性由主线程写函数额外实现，
                 //迁移完成之后由回调函数执行，更新有关条目时需要上锁
-                pthread_mutex_lock(&de->lock);
+                /*pthread_mutex_lock(&de->lock);
                 PromotionPush(&promotion_info, key->ptr, val->ptr);
                 de->readcnt = 0;
-                pthread_mutex_unlock(&de->lock);
-               // pthread_cond_signal(&cache_cond);
+                pthread_mutex_unlock(&de->lock);*/
             }
         }
 

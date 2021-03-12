@@ -581,6 +581,7 @@ static int cliReadReply(int output_raw_strings) {
 
 static int cliSendCommand(int argc, char **argv, int repeat) {
     char *command = argv[0];
+    //printf("command %s, argc %d\n", command, argc);
     size_t *argvlen;
     int j, output_raw;
 
@@ -612,8 +613,10 @@ static int cliSendCommand(int argc, char **argv, int repeat) {
 
     /* Setup argument length */
     argvlen = malloc(argc*sizeof(size_t));
-    for (j = 0; j < argc; j++)
+    for (j = 0; j < argc; j++){
         argvlen[j] = sdslen(argv[j]);
+        //printf("%d %s\n", j, argv[j]);
+    }
 
     while(repeat--) {
         redisAppendCommandArgv(context,argc,(const char**)argv,argvlen);

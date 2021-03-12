@@ -8,8 +8,8 @@ typedef struct KVCache_Node{
     const char *value;
 } KVCache_Node;
 
-typedef struct PromotionBufferNode{ 
-    void *data;     //数据,结构体形式
+typedef struct PromotionBufferNode{
+    void *data; //数据,结构体形式
     struct PromotionBufferNode *next;
 } PromotionBufferNode;
 

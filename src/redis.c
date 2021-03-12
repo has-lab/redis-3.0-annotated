@@ -4081,16 +4081,10 @@ int main(int argc, char **argv) {
     aeSetBeforeSleepProc(server.el,beforeSleep);
 
 /* ---------------------haslab add--------------------- */
-    //printf("before pthread_create\n");
-    InitP();
+    //InitP();
 /* ---------------------------------------------------- */
 
     aeMain(server.el);
-
-/* ---------------------haslab add--------------------- */
-    //printf("after pthread_create\n"); 
-    //pthread_join(haslab_cacheloop_pid, NULL);
-/* ---------------------------------------------------- */
 
     // 服务器关闭，停止事件循环
     aeDeleteEventLoop(server.el);

@@ -67,10 +67,10 @@ void HandlePromotion(){
             tmp = NULL;
         }
         else pthread_mutex_unlock(&pi->pi_mutex);
-        sleep(10);
-        pthread_mutex_lock(&thread_pool.tp_mutex);
-        printf("thread num %d\n", thread_pool.promotion_thread_num);
-        pthread_mutex_unlock(&thread_pool.tp_mutex);
+        //usleep(10);
+        //pthread_mutex_lock(&thread_pool.tp_mutex);
+        //printf("thread num %d\n", thread_pool.promotion_thread_num);
+        //pthread_mutex_unlock(&thread_pool.tp_mutex);
     }
 }
 
